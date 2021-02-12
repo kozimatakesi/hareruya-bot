@@ -35,11 +35,13 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         if (event.type == "message" && event.message.type == "text"){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "こんにちは"){
-                var weather = callApi();
-                // replyMessage()で返信し、そのプロミスをevents_processedに追加。
+              const res = await fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
+              const results = await res.json();
+              const nowWeather = "現在の" + results.name + "は" + results.weather[0].description + "です";
+              // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                 events_processed.push(bot.replyMessage(event.replyToken, {
                     type: "text",
-                    text: weather
+                    text: nowWeather
                 }));
             }
         }
@@ -53,10 +55,3 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
     );
 });
 // -----------------------------------------------------------------------------
-async function callApi(){
-  //現在の東京都の天気を取得
-  const res = await fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
-  const results = await res.json();
-  const nowWeather = "現在の" + results.name + "は" + results.weather[0].description + "です";
-  return nowWeather;
-}
