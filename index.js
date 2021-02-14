@@ -60,5 +60,5 @@ async function callApi(){
   console.log(results);
   var nowWeather = results.weather[0].description;
   console.log(nowWeather);
-  return nowWeather;
+  return `${nowWeather}`;
 }
