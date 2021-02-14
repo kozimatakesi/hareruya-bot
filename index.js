@@ -37,7 +37,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             if (event.message.text == "こんにちは"){
               var ress = fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
               var results = ress.json;
-              var nowWeather = "現在の" + results.name + "は" + results.weather[0].description + "です";
+              var nowWeather = "現在のは" + results.weather[0].description + "です";
               // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                 events_processed.push(bot.replyMessage(event.replyToken, {
                     type: "text",
