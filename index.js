@@ -39,7 +39,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
               const nowWeather = fetch('http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric')
                                   .then(res => res.json())
                                   .then(json => {
-                                    console.log(json.weather[0].description);
+                                    console.log(json.weather[0].description)
                                     return json.weather[0].description
                                   });
 
