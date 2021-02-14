@@ -36,7 +36,9 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "こんにちは"){
               var ress = fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
+              console.log(ress);
               var results = ress.json;
+              console.log(results);
               var nowWeather = "現在のは" + results.weather[0].description + "です";
               // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                 events_processed.push(bot.replyMessage(event.replyToken, {
