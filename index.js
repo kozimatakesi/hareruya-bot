@@ -35,7 +35,10 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         if (event.type == "message" && event.message.type == "text"){
             // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             if (event.message.text == "こんにちは"){
-              var nowWeather = "現在は" + `${callApi()}`;
+              callApi().then(result => {
+                console.log(result); // => 15
+                nowWeather = "現在は" + `${result}`;
+              });
               // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                 events_processed.push(bot.replyMessage(event.replyToken, {
                     type: "text",
@@ -61,3 +64,7 @@ async function callApi(){
   console.log(nowWeather);
   return nowWeather;
 }
+
+callApi().then(result => {
+  console.log(result); // => 15
+});
