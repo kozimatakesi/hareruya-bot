@@ -56,7 +56,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
 async function callApi(){
   var ress = await fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
   console.log(ress);
-  var results = ress.json();
+  var results = await ress.json();
   console.log(results);
   var nowWeather = results.weather[0].description;
   console.log(nowWeather);
