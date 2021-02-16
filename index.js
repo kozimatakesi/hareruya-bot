@@ -77,7 +77,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                 console.log(results[0].name);
                 events_processed.push(bot.replyMessage(event.replyToken, {
                   type: "text",
-                  text: "どういたしまして"
+                  text: results[0].name
                 }));
               }
             )
