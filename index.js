@@ -5,12 +5,21 @@ const line = require("@line/bot-sdk"); // Messaging APIのSDKをインポート
 const { json } = require("express");
 const fetch = require('node-fetch');
 const mysql = require('mysql');
-
+// -----------------------------------------------------------------------------
+// データベース接続
 const connection = mysql.createConnection({
   host: SERVER_NAME,
   user: USER_NAME,
   password: PASSWORD,
   database: DATABASE
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.log(`error connecting: ${err.stack}`);
+    return;
+  }
+  console.log('success');
 });
 // -----------------------------------------------------------------------------
 // パラメータ設定
@@ -60,6 +69,19 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
               text: "どういたしまして"
             }));
           }
+          if(event.message.text == "読み込む"){
+            connection.query(
+              'SELECT * FROM cards WHERE id = ? ',
+              [1],
+              (error, results)=> {
+                console.log(results);
+                events_processed.push(bot.replyMessage(event.replyToken, {
+                  type: "text",
+                  text: "どういたしまして"
+                }));
+              }
+            )
+          }
         }
     });
 
@@ -71,11 +93,3 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
     );
 });
 // -----------------------------------------------------------------------------
-async function callApi(){
-  var ress = await fetch("http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric");
-  var results = await ress.json();
-  console.log(results);
-  var nowWeather = results.weather[0].description;
-  console.log(nowWeather);
-  return nowWeather;
-}
