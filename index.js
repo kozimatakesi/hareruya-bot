@@ -74,7 +74,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
               'SELECT * FROM cards WHERE id = ? ',
               [1],
               (error, results)=> {
-                console.log(results);
+                console.log(results[0].name);
                 events_processed.push(bot.replyMessage(event.replyToken, {
                   type: "text",
                   text: "どういたしまして"
