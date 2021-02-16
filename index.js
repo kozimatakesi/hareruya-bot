@@ -4,6 +4,14 @@ const server = require("express")();
 const line = require("@line/bot-sdk"); // Messaging APIのSDKをインポート
 const { json } = require("express");
 const fetch = require('node-fetch');
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host: SERVER_NAME,
+  user: USER_NAME,
+  password: PASSWORD,
+  database: DATABASE
+});
 // -----------------------------------------------------------------------------
 // パラメータ設定
 const line_config = {
