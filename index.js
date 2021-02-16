@@ -8,10 +8,10 @@ const mysql = require('mysql');
 // -----------------------------------------------------------------------------
 // データベース接続
 const connection = mysql.createConnection({
-  host: ENV['SERVER_NAME'],
-  user: ENV['USER_NAME'],
-  password: ENV['PASSWORD'],
-  database: ENV['DATABASE']
+  host: process.env.SERVER_NAME,
+  user: process.env.USER_NAME,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
 });
 
 connection.connect((err) => {
