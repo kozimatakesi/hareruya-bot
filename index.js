@@ -7,7 +7,15 @@ const fetch = require('node-fetch');
 const mysql = require('mysql');
 // -----------------------------------------------------------------------------
 // データベース接続
+/*
 const connection = mysql.createConnection({
+  host: process.env.SERVER_NAME,
+  user: process.env.USER_NAME,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
+});
+*/
+const pool = mysql.createPool({
   host: process.env.SERVER_NAME,
   user: process.env.USER_NAME,
   password: process.env.PASSWORD,
@@ -70,17 +78,20 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             }));
           }
           if(event.message.text == "読み込む"){
-            connection.query(
-              'SELECT * FROM cards WHERE id = ? ',
-              [1],
-              (error, results)=> {
-                console.log(results[0].name);
-                events_processed.push(bot.replyMessage(event.replyToken, {
-                  type: "text",
-                  text: results[0].name
-                }));
-              }
-            )
+            pool.getConnection(function(err, connection) {
+              connection.query(
+                'SELECT * FROM cards WHERE id = ? ',
+                [1],
+                (error, results)=> {
+                  console.log(results[0].name);
+                  events_processed.push(bot.replyMessage(event.replyToken, {
+                    type: "text",
+                    text: results[0].name
+                  }));
+                  connection.release();
+                }
+              )
+            })
           }
         }
     });
