@@ -78,6 +78,10 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
               type: "text",
               text: "どういたしましてやんけ"
             }));
+            bot.pushMessage('U6b3963a1368a4879d411264a6950a01d',{
+              type: 'text',
+              text: 'いかがなもんかね',
+            })
           }
           if(event.message.text == "読み込む"){
             pool.getConnection(function(err, connection) {
@@ -112,7 +116,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
           }
         }
     });
-
     // すべてのイベント処理が終了したら何個のイベントが処理されたか出力。
     Promise.all(events_processed).then(
         (response) => {
