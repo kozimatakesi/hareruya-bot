@@ -39,6 +39,12 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
 
   // イベントオブジェクトを順次処理。
   req.body.events.forEach((event) => {
+    if (event.type === 'sticker') {
+      bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+        type: 'text',
+        text: 'スタンプを送るな！',
+      });
+    }
     // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
     if (event.type === 'message' && event.message.type === 'text') {
       // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
