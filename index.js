@@ -95,6 +95,21 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
               )
             })
           }
+          if(event.message.text == "書き込む"){
+            pool.getConnection(function(err, connection) {
+              connection.query(
+                'INSERT INTO cards(name, price) VALUES (?, ?)',
+                ['謎めいた命令', 2000],
+                (error, results)=> {
+                  events_processed.push(bot.replyMessage(event.replyToken, {
+                    type: "text",
+                    text: '投稿完了'
+                  }));
+                  connection.release();
+                }
+              )
+            })
+          }
         }
     });
 
