@@ -22,6 +22,7 @@ const pool = mysql.createPool({
   database: process.env.DATABASE
 });
 
+/*
 pool.connect((err) => {
   if (err) {
     console.log(`error connecting: ${err.stack}`);
@@ -29,6 +30,7 @@ pool.connect((err) => {
   }
   console.log('success');
 });
+*/
 // -----------------------------------------------------------------------------
 // パラメータ設定
 const line_config = {
