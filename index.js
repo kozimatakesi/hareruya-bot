@@ -22,7 +22,7 @@ const pool = mysql.createPool({
   database: process.env.DATABASE
 });
 
-connection.connect((err) => {
+pool.connect((err) => {
   if (err) {
     console.log(`error connecting: ${err.stack}`);
     return;
