@@ -66,7 +66,7 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
           if(event.message.text == "ありがとう"){
             events_processed.push(bot.replyMessage(event.replyToken, {
               type: "text",
-              text: "どういたしまして"
+              text: "どういたしましてやんけ"
             }));
           }
           if(event.message.text == "読み込む"){
