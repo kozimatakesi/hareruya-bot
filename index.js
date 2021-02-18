@@ -83,15 +83,16 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
-      if (event.message.text === '書き込む') {
+      if (event.message.text.match('!')) {
+        const inputMessage = event.message.text.slice(1);
         pool.getConnection((err, connection) => {
           connection.query(
             'INSERT INTO cards(name, price) VALUES (?, ?)',
-            ['謎めいた命令', 2000],
+            [inputMessage, 2000],
             (error, results) => {
               eventsProcessed.push(bot.replyMessage(event.replyToken, {
                 type: 'text',
-                text: '投稿完了',
+                text: inputMessage,
               }));
               connection.release();
             },
