@@ -3,6 +3,8 @@ const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 const mysql = require('mysql');
+const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 // -----------------------------------------------------------------------------
 // データベース接続
 const pool = mysql.createPool({
