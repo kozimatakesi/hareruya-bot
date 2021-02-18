@@ -100,11 +100,13 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
       }
     }
   });
+  /*
   // すべてのイベント処理が終了したら何個のイベントが処理されたか出力。
   Promise.all(eventsProcessed).then(
     (response) => {
       console.log(`${response.length} event(s) processed.`);
     },
   );
+  */
 });
 // -----------------------------------------------------------------------------
