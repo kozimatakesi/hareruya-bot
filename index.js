@@ -123,8 +123,12 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
               type: 'text',
               text: `${datas[0]} ${prices[0]}`,
             });
+
+            browser.close();
+          } catch(e) {
+            console.error(e)
           }
-        })
+        })();
       }
     }
   });
