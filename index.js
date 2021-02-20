@@ -103,10 +103,10 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         });
       }
       if(event.message.text === 'プペッター'){
-        !(async() => {
+        !(async () => {
           try {
             const browser = await puppetter.launch({
-              ignoreDefaultArgs: ['--disable-extensions'],
+              ignoreDefaultArgs: ['--disable-extensions','--no-sandbox', '--disable-setuid-sandbox'],
             });
             const page = await browser.newPage();
             await page.goto('https://www.hareruyamtg.com/ja/products/search?cardset=242&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&sort=price&order=DESC&page=1');
