@@ -127,6 +127,11 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
               text: `${datas[0]}は${prices[0]}`,
             });
 
+            bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+              type: 'text',
+              text: `${datas[1]}は${prices[1]}`,
+            });
+
             browser.close();
           } catch(e) {
             console.error(e);
