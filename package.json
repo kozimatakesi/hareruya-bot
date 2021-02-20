@@ -14,7 +14,8 @@
     "express": "4.17.1",
     "jsdom": "^16.4.0",
     "mysql": "^2.18.1",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "puppeteer": "^7.1.0"
   },
   "engines": {
     "node": "15.3.0",
