@@ -4,6 +4,7 @@ const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 const mysql = require('mysql');
 const jsdom = require('jsdom');
+const puppetter = require('puppeteer');
 const { JSDOM } = jsdom;
 // -----------------------------------------------------------------------------
 // データベース接続
@@ -126,7 +127,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
 
             browser.close();
           } catch(e) {
-            console.error(e)
+            console.error(e);
           }
         })();
       }
