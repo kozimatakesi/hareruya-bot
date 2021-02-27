@@ -108,6 +108,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
         const selectExpantions = hogehoge(inputMessage);
+        console.log(selectExpantions);
         eventsProcessed.push(bot.replyMessage(event.replyToken, {
           type: 'text',
           text: selectExpantions[0].value,
