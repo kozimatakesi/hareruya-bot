@@ -86,7 +86,6 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
-      /*
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
         pool.getConnection((err, connection) => {
@@ -103,8 +102,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
-      */
-
+      /*
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
         const selectExpantions = hogehoge(inputMessage);
@@ -114,6 +112,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           text: selectExpantions[0].value,
         }));
       }
+      */
 
       if(event.message.text === 'プペッター'){
         !(async () => {
@@ -162,6 +161,10 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
   );
   */
 
+
+});
+// -----------------------------------------------------------------------------
+/*
   const hogehoge = async(input) => {
     try {
       const browser = await puppetter.launch({
@@ -184,11 +187,8 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         }
       }
       browser.close();
-      return nameArray;
     } catch(e) {
       console.error(e);
     }
   }
-
-});
-// -----------------------------------------------------------------------------
+*/
