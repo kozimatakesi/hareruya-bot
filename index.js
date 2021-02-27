@@ -110,7 +110,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         const selectExpantions = hogehoge(inputMessage);
         eventsProcessed.push(bot.replyMessage(event.replyToken, {
           type: 'text',
-          text: selectExpantions[1].name,
+          text: selectExpantions[0].value,
         }));
       }
 
@@ -162,10 +162,12 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
   */
 });
 // -----------------------------------------------------------------------------
-const hogehoge = async(name) => {
+const hogehoge = async(input) => {
   try {
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage()
+    const browser = await puppetter.launch({
+      args: ['--no-sandbox'],
+    });
+    const page = await browser.newPage();
     //晴れる屋のサイトに遷移
     await page.goto('https://www.hareruyamtg.com/ja/products/search');
 
@@ -177,13 +179,13 @@ const hogehoge = async(name) => {
     //上位５枚のカード名と値段を表示
     const nameArray = [];
     for(let i = 0; i < datas.length; i++){
-      if(datas[i].name.match(name)) {
+      if(datas[i].name.match(input)) {
         nameArray.push(datas[i]);
       }
     }
-    browser.close()
+    browser.close();
     return nameArray;
   } catch(e) {
-    console.error(e)
+    console.error(e);
   }
 }
