@@ -86,6 +86,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
+      /*
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
         pool.getConnection((err, connection) => {
@@ -102,6 +103,17 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
+      */
+
+      if (event.message.text.match('!')) {
+        const inputMessage = event.message.text.slice(1);
+        const selectExpantions = hogehoge(inputMessage);
+        eventsProcessed.push(bot.replyMessage(event.replyToken, {
+          type: 'text',
+          text: selectExpantions[1].name,
+        }));
+      }
+
       if(event.message.text === 'プペッター'){
         !(async () => {
           try {
@@ -150,3 +162,28 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
   */
 });
 // -----------------------------------------------------------------------------
+const hogehoge = async(name) => {
+  try {
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    //晴れる屋のサイトに遷移
+    await page.goto('https://www.hareruyamtg.com/ja/products/search');
+
+    //datasにitemNameの値を全て取得後、配列にして代入
+    const datas = await page.evaluate(() => {
+      const list = [...document.querySelectorAll('#front_product_search_cardset option')];
+      return list.map(data => ({name: data.textContent, value: data.value }));
+    });
+    //上位５枚のカード名と値段を表示
+    const nameArray = [];
+    for(let i = 0; i < datas.length; i++){
+      if(datas[i].name.match(name)) {
+        nameArray.push(datas[i]);
+      }
+    }
+    browser.close()
+    return nameArray;
+  } catch(e) {
+    console.error(e)
+  }
+}
