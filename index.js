@@ -8,20 +8,26 @@ const puppetter = require('puppeteer');
 const { JSDOM } = jsdom;
 // -----------------------------------------------------------------------------
 // データベース接続
+/*
 const pool = mysql.createPool({
   host: process.env.SERVER_NAME,
   user: process.env.USER_NAME,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
 });
-
+*/
 // -----------------------------------------------------------------------------
 // パラメータ設定
+/*
 const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
   channelSecret: process.env.LINE_CHANNEL_SECRET, // 環境変数からChannel Secretをセットしています
 };
-
+*/
+const lineConfig = {
+  channelAccessToken:'w6VjWFqXigMZhPTwkqq5aQZBd563o04eEvUNQTKTUp87LGfliqD0O5BPl7431xeZeWwU2OJlvfo7/TOpoWnFW2NhjqcYNK5AG9rcqEvF9hoTM+6/JuCWYxnRnVkKn2jq1Ua8q2E/qbN8mcQtssAViQdB04t89/1O/w1cDnyilFU=', // 環境変数からアクセストークンをセットしています
+  channelSecret:'98cf4cabb5c2bcd86b00de14fb8814cd', // 環境変数からChannel Secretをセットしています
+};
 // -----------------------------------------------------------------------------
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
@@ -68,7 +74,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         }));
         bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
           type: 'text',
-          text: 'いかがなもんかね',
+          text: 'そうとはいうけれども、たださぁ、そんなでもないよ？',
         });
       }
       if (event.message.text === '読み込む') {
@@ -86,6 +92,8 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
+      /*
+      //「！」を入力したあとの文字と価格[2000]をデータベースに書き込む
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
         pool.getConnection((err, connection) => {
@@ -102,17 +110,64 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           );
         });
       }
-      /*
+      */
+
       if (event.message.text.match('!')) {
         const inputMessage = event.message.text.slice(1);
-        const selectExpantions = hogehoge(inputMessage);
-        console.log(selectExpantions);
-        eventsProcessed.push(bot.replyMessage(event.replyToken, {
-          type: 'text',
-          text: selectExpantions[0].value,
-        }));
+        !(async () => {
+          try {
+            const browser = await puppetter.launch({
+              args: ['--no-sandbox'],
+            });
+            const page = await browser.newPage();
+            await page.goto('https://www.hareruyamtg.com/ja/products/search');
+
+            const datas = await page.evaluate(() => {
+              const list = [...document.querySelectorAll('#front_product_search_cardset option')];
+              return list.map(data => ({name: data.textContent, value: data.value}));
+            });
+
+            const nameArray = [];
+            for(let i = 0; i < datas.length; i++){
+              if(datas[i].name.match(inputMessage)) {
+                nameArray.push(datas[i]);
+              }
+            }
+            console.log(nameArray);
+
+            let manyExpantion = [];
+            if(nameArray.length > 1){
+              for(let j = 0; j < nameArray.length; j++){
+                  manyExpantion.push(`「${nameArray[j].name}」は「${nameArray[j].value}」です`)
+              }
+              const joinArray = manyExpantion.join(`\n---------------------------------------------\n`);
+              console.log(joinArray);
+              bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                type: 'text',
+                text: `${joinArray}`,
+              });
+              bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                type: 'text',
+                text: `複数一致しています、知りたいエキスパンションのナンバーを入力してください`,
+              });
+            } else {
+              bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                type: 'text',
+                text: `正解です`,
+              });
+            }
+            browser.close();
+          } catch(e) {
+            console.error(e);
+          }
+        })();
       }
-      */
+      if(event.message.text.match(/[0-9]{1,3}/)){
+        bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+          type: 'text',
+          text: `数字${event.message.text}だね`,
+        });
+      }
 
       if(event.message.text === 'プペッター'){
         !(async () => {
@@ -141,7 +196,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
 
             bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
               type: 'text',
-              text: `${datas[1]}は${prices[1]}`,
+              text: `${datas[5]}は${prices[5]}`,
             });
 
             browser.close();
@@ -164,7 +219,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
 
 });
 // -----------------------------------------------------------------------------
-/*
+
   const hogehoge = async(input) => {
     try {
       const browser = await puppetter.launch({
@@ -191,4 +246,3 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
       console.error(e);
     }
   }
-*/
