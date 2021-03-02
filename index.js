@@ -113,6 +113,10 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
       */
 
       if (event.message.text.match('!')) {
+        bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+          type: 'text',
+          text: 'データ取得中、しばらくお待ちください',
+        });
         const inputMessage = event.message.text.slice(1);
         !(async () => {
           try {
@@ -162,11 +166,52 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           }
         })();
       }
+
       if(event.message.text.match(/[0-9]{1,3}/)){
         bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
           type: 'text',
-          text: `数字${event.message.text}だね`,
+          text: 'データ取得中、しばらくお待ちください',
         });
+        !(async () => {
+          try {
+            const browser = await puppetter.launch({
+              args: ['--no-sandbox'],
+            });
+            const page = await browser.newPage();
+            await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${event.message.text}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
+            //datasにitemNameの値を全て取得後、配列にして代入
+            const datas = await page.evaluate(() => {
+              const list = [...document.querySelectorAll('.itemName')];
+              return list.map(data => data.textContent.trim());
+            });
+            //pricesにitemDetail__priceの値を全て取得後、配列にして代入
+            const prices = await page.evaluate(() => {
+              const list = [...document.querySelectorAll('.itemDetail__price')];
+              return list.map(data => data.textContent);
+            });
+
+            let i = 0;
+            const countUp = () => {
+              bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                type: 'text',
+                text: `第${i + 1}位\n${datas[i]}\n${prices[i]}`,
+              });
+              console.log(i++);
+            }
+            const intervalId = setInterval(() => {
+              countUp();
+              if(i >= 5){
+                clearInterval(intervalId);
+              }
+            },500);
+            browser.close();
+          } catch(e) {
+            console.error(e);
+          }
+        })();
+      }
+      const time = () => {
+        console.log('time');
       }
 
       if(event.message.text === 'プペッター'){
