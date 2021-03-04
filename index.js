@@ -157,8 +157,45 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
             } else {
               bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
                 type: 'text',
-                text: `正解です`,
+                text: `エキスパンション:${nameArray[0].name}`,
               });
+              !(async () => {
+                try {
+                  const browser = await puppetter.launch({
+                    args: ['--no-sandbox'],
+                  });
+                  const page = await browser.newPage();
+                  await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${nameArray[0].value}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
+                  //datasにitemNameの値を全て取得後、配列にして代入
+                  const datas = await page.evaluate(() => {
+                    const list = [...document.querySelectorAll('.itemName')];
+                    return list.map(data => data.textContent.trim());
+                  });
+                  //pricesにitemDetail__priceの値を全て取得後、配列にして代入
+                  const prices = await page.evaluate(() => {
+                    const list = [...document.querySelectorAll('.itemDetail__price')];
+                    return list.map(data => data.textContent);
+                  });
+
+                  let i = 0;
+                  const countUp = () => {
+                    bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                      type: 'text',
+                      text: `第${i + 1}位\n${datas[i]}\n${prices[i]}`,
+                    });
+                    console.log(i++);
+                  }
+                  const intervalId = setInterval(() => {
+                    countUp();
+                    if(i >= 5){
+                      clearInterval(intervalId);
+                    }
+                  },500);
+                  browser.close();
+                } catch(e) {
+                  console.error(e);
+                }
+              })();
             }
             browser.close();
           } catch(e) {
@@ -179,6 +216,21 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
             });
             const page = await browser.newPage();
             await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${event.message.text}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
+
+            //エキスパンション名の取得
+            const expName = await page.evaluate(() => {
+              const list = [...document.querySelectorAll('#front_product_search_cardset option')];
+              return list.map(data => ({name: data.textContent, value: data.value}));
+            });
+
+            for(let i = 0; i < expName.length; i++){
+              if(expName[i].value.match(event.message.text)){
+                bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+                  type: 'text',
+                  text: `エキスパンション:${expName[i].name}`,
+                });
+                }
+            }
             //datasにitemNameの値を全て取得後、配列にして代入
             const datas = await page.evaluate(() => {
               const list = [...document.querySelectorAll('.itemName')];
@@ -209,9 +261,6 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
             console.error(e);
           }
         })();
-      }
-      const time = () => {
-        console.log('time');
       }
 
       if(event.message.text === 'プペッター'){
