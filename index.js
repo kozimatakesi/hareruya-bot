@@ -15,16 +15,16 @@ const pool = mysql.createPool({
 });
 // -----------------------------------------------------------------------------
 // パラメータ設定
-/*
 const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
   channelSecret: process.env.LINE_CHANNEL_SECRET, // 環境変数からChannel Secretをセットしています
 };
-*/
+/*
 const lineConfig = {
   channelAccessToken: 'w6VjWFqXigMZhPTwkqq5aQZBd563o04eEvUNQTKTUp87LGfliqD0O5BPl7431xeZeWwU2OJlvfo7/TOpoWnFW2NhjqcYNK5AG9rcqEvF9hoTM+6/JuCWYxnRnVkKn2jq1Ua8q2E/qbN8mcQtssAViQdB04t89/1O/w1cDnyilFU=', // 環境変数からアクセストークンをセットしています
   channelSecret: '98cf4cabb5c2bcd86b00de14fb8814cd', // 環境変数からChannel Secretをセットしています
 };
+*/
 // -----------------------------------------------------------------------------
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
