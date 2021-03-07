@@ -171,71 +171,16 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
               }));
             });
         }
-
-        //データベース操作、後日実装
-        /*
-        if (event.message.text === '読み込む') {
-          pool.getConnection((err, connection) => {
-            connection.query(
-              'SELECT * FROM cards WHERE id = ? ',
-              [1],
-              (error, results) => {
-                eventsProcessed.push(bot.replyMessage(event.replyToken, {
-                  type: 'text',
-                  text: results[0].name,
-                }));
-                connection.release();
-              },
-            );
-          });
-        }
-        // 「¥」を入力したあとの文字と価格[2000]をデータベースに書き込む
-        if (event.message.text.match('¥')) {
-          const inputMessage = event.message.text.slice(1);
-          pool.getConnection((err, connection) => {
-            connection.query(
-              'INSERT INTO cards(name, price) VALUES (?, ?)',
-              [inputMessage, 2000],
-              (error, results) => {
-                eventsProcessed.push(bot.replyMessage(event.replyToken, {
-                  type: 'text',
-                  text: inputMessage,
-                }));
-                connection.release();
-              },
-            );
-          });
-        }
-        */
-
         //「!」入力後の文字列が含まれるエキスパンションを検索
         if (event.message.text.match('!')) {
           pushLine('データ取得中、しばらくお待ちください');
           const inputMessage = event.message.text.slice(1);
-
           (async () => {
-          /*
-            const browser = await puppetter.launch({
-              args: ['--no-sandbox'],
-            });
-            const page = await browser.newPage();
-            await page.goto('https://www.hareruyamtg.com/ja/products/search');
-            const datas = await page.evaluate(() => {
-              const list = [...document.querySelectorAll('#front_product_search_cardset option')];
-              return list.map((data) => ({ name: data.textContent, value: data.value }));
-            });
-            //文字列inputMessageがnameに含まれる要素を配列nameArrayに追加
-            const nameArray = datas.filter(data => data.name.match(inputMessage));
-            console.log(nameArray);
-          */
-
             const nameArray = await nameAndValueArray(inputMessage);
             console.log(nameArray);
-
             //「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
             if (nameArray.length === 0 || inputMessage === '') {
               pushLine('見当たりませんでした');
-              //browser.close();
               return;
             //入力された文字列が含まれるエキスパンションが複数あった場合
             } else if(nameArray.length > 1) {
@@ -244,144 +189,24 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
               console.log(joinArray);
               pushLine(`${joinArray}`);
               pushLine('複数一致しています、知りたいエキスパンションのナンバーを入力してください');
-              //browser.close();
             //入力された文字列が含まれるエキスパンションが一つだった場合
             } else {
               pushLine(`エキスパンション:${nameArray[0].name}`);
               rankValue(nameArray);
-              /*
-              (async () => {
-                  const browser = await puppetter.launch({
-                    args: ['--no-sandbox'],
-                  });
-                  const page = await browser.newPage();
-                  await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${nameArray[0].value}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
-
-                  // datasにitemNameの値を全て取得後、配列にして代入
-                  const datas = await page.evaluate(() => {
-                    const list = [...document.querySelectorAll('.itemName')];
-                    return list.map((data) => data.textContent.trim());
-                  });
-                  // pricesにitemDetail__priceの値を全て取得後、配列にして代入
-                  const prices = await page.evaluate(() => {
-                    const list = [...document.querySelectorAll('.itemDetail__price')];
-                    return list.map((data) => data.textContent);
-                  });
-
-                  let i = 0;
-                  const countUp = () => {
-                    pushLine(`第${i + 1}位\n${datas[i]}\n${prices[i]}`);
-                    console.log(i++);
-                  };
-                  const intervalId = setInterval(() => {
-                    countUp();
-                    if (i >= 5) {
-                      clearInterval(intervalId);
-                    }
-                  }, 500);
-                  browser.close();
-              })();
-              */
             }
-            //browser.close();
           })();
         }
-
+        //エキスパンションナンバー（3桁以内の数値）を入力した場合
         if (event.message.text.match(/[0-9]{1,3}/)) {
           pushLine('データ取得中、しばらくお待ちください');
           (async () => {
             rankValue(`${event.message.text}`);
-              /*
-              const browser = await puppetter.launch({
-                args: ['--no-sandbox'],
-              });
-              const page = await browser.newPage();
-              await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${event.message.text}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
-
-              // エキスパンション名の取得
-              const expName = await page.evaluate(() => {
-                const list = [...document.querySelectorAll('#front_product_search_cardset option')];
-                return list.map((data) => ({ name: data.textContent, value: data.value }));
-              });
-
-              for (let i = 0; i < expName.length; i++) {
-                if (expName[i].value === event.message.text) {
-                  pushLine(`エキスパンション:${expName[i].name}`);
-                }
-              }
-              // datasにitemNameの値を全て取得後、配列にして代入
-              const datas = await page.evaluate(() => {
-                const list = [...document.querySelectorAll('.itemName')];
-                return list.map((data) => data.textContent.trim());
-              });
-              // pricesにitemDetail__priceの値を全て取得後、配列にして代入
-              const prices = await page.evaluate(() => {
-                const list = [...document.querySelectorAll('.itemDetail__price')];
-                return list.map((data) => data.textContent);
-              });
-
-              let i = 0;
-              const countUp = () => {
-                pushLine(`第${i + 1}位\n${datas[i]}\n${prices[i]}`);
-                console.log(i++);
-              };
-              const intervalId = setInterval(() => {
-                countUp();
-                if (i >= 5) {
-                  clearInterval(intervalId);
-                }
-              }, 500);
-              browser.close();
-              */
-
-
           })();
-        }
-
-
-
-        if (event.message.text === 'プペッター') {
-          pupette();
-        }
-        if(event.message.text === 'プンコ') {
-          console.log('関数やるよ');
-          pupette();
         }
       }
     });
-
-
   }
 
   mainFunction();
 
 });
-// -----------------------------------------------------------------------------
-/*
-const hogehoge = async (input) => {
-  try {
-    const browser = await puppetter.launch({
-      args: ['--no-sandbox'],
-    });
-    const page = await browser.newPage();
-    // 晴れる屋のサイトに遷移
-    await page.goto('https://www.hareruyamtg.com/ja/products/search');
-
-    // datasにitemNameの値を全て取得後、配列にして代入
-    const datas = await page.evaluate(() => {
-      const list = [...document.querySelectorAll('#front_product_search_cardset option')];
-      return list.map((data) => ({ name: data.textContent, value: data.value }));
-    });
-      // 上位５枚のカード名と値段を表示
-    const nameArray = [];
-    for (let i = 0; i < datas.length; i++) {
-      if (datas[i].name.match(input)) {
-        nameArray.push(datas[i]);
-      }
-    }
-    browser.close();
-  } catch (e) {
-    console.error(e);
-  }
-};
-*/
