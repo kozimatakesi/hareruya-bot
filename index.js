@@ -4,6 +4,7 @@ const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 const mysql = require('mysql');
 const puppetter = require('puppeteer');
+const export_function = require('./function.js');
 
 // -----------------------------------------------------------------------------
 // データベース接続
@@ -15,16 +16,17 @@ const pool = mysql.createPool({
 });
 // -----------------------------------------------------------------------------
 // パラメータ設定
-/*
+
 const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
   channelSecret: process.env.LINE_CHANNEL_SECRET, // 環境変数からChannel Secretをセットしています
 };
-*/
+/*
 const lineConfig = {
   channelAccessToken: 'w6VjWFqXigMZhPTwkqq5aQZBd563o04eEvUNQTKTUp87LGfliqD0O5BPl7431xeZeWwU2OJlvfo7/TOpoWnFW2NhjqcYNK5AG9rcqEvF9hoTM+6/JuCWYxnRnVkKn2jq1Ua8q2E/qbN8mcQtssAViQdB04t89/1O/w1cDnyilFU=', // 環境変数からアクセストークンをセットしています
   channelSecret: '98cf4cabb5c2bcd86b00de14fb8814cd', // 環境変数からChannel Secretをセットしています
 };
+*/
 // -----------------------------------------------------------------------------
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
@@ -34,43 +36,8 @@ server.listen(process.env.PORT || 3000);
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(lineConfig);
 
-
-
-const pupette = async () => {
-  try {
-    const browser = await puppetter.launch({
-      args: ['--no-sandbox'],
-    });
-    const page = await browser.newPage();
-    await page.goto('https://www.hareruyamtg.com/ja/products/search?cardset=242&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&sort=price&order=DESC&page=1');
-    // datasにitemNameの値を全て取得後、配列にして代入
-    const datas = await page.evaluate(() => {
-      const list = [...document.querySelectorAll('.itemName')];
-      return list.map((data) => data.textContent.trim());
-    });
-
-    // pricesにitemDetail__priceの値を全て取得後、配列にして代入
-    const prices = await page.evaluate(() => {
-      const list = [...document.querySelectorAll('.itemDetail__price')];
-      return list.map((data) => data.textContent);
-    });
-
-    bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
-      type: 'text',
-      text: `${datas[0]}は${prices[0]}`,
-    });
-
-    bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
-      type: 'text',
-      text: `${datas[5]}は${prices[5]}`,
-    });
-
-    browser.close();
-  } catch (e) {
-    console.error(e);
-  }
-};
-
+// -----------------------------------------------------------------------------
+//関数の定義
 //引数に入れた文字列をLineに送信する関数
 const pushLine = (message) => {
   bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
@@ -78,74 +45,6 @@ const pushLine = (message) => {
     text: message,
   });
 }
-
-const rankValue = async (nameArray) => {
-  let urlNumber = ''
-  if(isNaN(nameArray) === false){
-    urlNumber = nameArray;
-  } else {
-    urlNumber = nameArray[0].value;
-  }
-  const browser = await puppetter.launch({
-    args: ['--no-sandbox'],
-  });
-  const page = await browser.newPage();
-  await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${urlNumber}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
-
-  // エキスパンション名の取得
-  const expName = await page.evaluate(() => {
-    const list = [...document.querySelectorAll('#front_product_search_cardset option')];
-    return list.map((data) => ({ name: data.textContent, value: data.value }));
-  });
-  if(isNaN(nameArray) === false){
-    for (let i = 0; i < expName.length; i++) {
-      if (expName[i].value === nameArray) {
-        pushLine(`エキスパンション:${expName[i].name}`);
-      }
-    }
-  }
-  // datasにitemNameの値を全て取得後、配列にして代入
-  const datas = await page.evaluate(() => {
-    const list = [...document.querySelectorAll('.itemName')];
-    return list.map((data) => data.textContent.trim());
-  });
-  // pricesにitemDetail__priceの値を全て取得後、配列にして代入
-  const prices = await page.evaluate(() => {
-    const list = [...document.querySelectorAll('.itemDetail__price')];
-    return list.map((data) => data.textContent);
-  });
-
-  let i = 0;
-  const countUp = () => {
-    pushLine(`第${i + 1}位\n${datas[i]}\n${prices[i]}`);
-    console.log(i++);
-  };
-  const intervalId = setInterval(() => {
-    countUp();
-    if (i >= 5) {
-      clearInterval(intervalId);
-    }
-  }, 500);
-  browser.close();
-};
-
-const nameAndValueArray = async (inputMessage) => {
-  const browser = await puppetter.launch({
-    args: ['--no-sandbox'],
-  });
-  const page = await browser.newPage();
-  await page.goto('https://www.hareruyamtg.com/ja/products/search');
-  const datas = await page.evaluate(() => {
-    const list = [...document.querySelectorAll('#front_product_search_cardset option')];
-    return list.map((data) => ({ name: data.textContent, value: data.value }));
-  });
-  //文字列inputMessageがnameに含まれる要素を配列nameArrayに追加
-  const nameArray = datas.filter(data => data.name.match(inputMessage));
-  browser.close();
-  return nameArray;
-}
-
-
 // -----------------------------------------------------------------------------
 // ルーター設定
 server.post('/webhook', line.middleware(lineConfig), (req, res) => {
@@ -155,7 +54,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
   // すべてのイベント処理のプロミスを格納する配列。
   const eventsProcessed = [];
 
-  const mainFunction = async() => {
+  (async() => {
   // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
       // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
@@ -176,7 +75,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
           pushLine('データ取得中、しばらくお待ちください');
           const inputMessage = event.message.text.slice(1);
           (async () => {
-            const nameArray = await nameAndValueArray(inputMessage);
+            const nameArray = await export_function.nameAndValueArray(inputMessage);
             console.log(nameArray);
             //「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
             if (nameArray.length === 0 || inputMessage === '') {
@@ -192,7 +91,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
             //入力された文字列が含まれるエキスパンションが一つだった場合
             } else {
               pushLine(`エキスパンション:${nameArray[0].name}`);
-              rankValue(nameArray);
+              export_function.rankValue(nameArray);
             }
           })();
         }
@@ -200,13 +99,10 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         if (event.message.text.match(/[0-9]{1,3}/)) {
           pushLine('データ取得中、しばらくお待ちください');
           (async () => {
-            rankValue(`${event.message.text}`);
+            export_function.rankValue(`${event.message.text}`);
           })();
         }
       }
     });
-  }
-
-  mainFunction();
-
+  })();
 });
