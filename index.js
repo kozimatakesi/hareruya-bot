@@ -80,12 +80,30 @@ const pushLine = (message) => {
 }
 
 const rankValue = async (nameArray) => {
+  let urlNumber = ''
+  if(isNaN(nameArray) === false){
+    urlNumber = nameArray;
+  } else {
+    urlNumber = nameArray[0].value;
+  }
   const browser = await puppetter.launch({
     args: ['--no-sandbox'],
   });
   const page = await browser.newPage();
-  await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${nameArray[0].value}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
+  await page.goto(`https://www.hareruyamtg.com/ja/purchase/search?cardset=${urlNumber}&rarity%5B0%5D=4&rarity%5B1%5D=3&foilFlg%5B0%5D=0&purchaseFlg=1&sort=price&order=DESC&page=1`);
 
+  // エキスパンション名の取得
+  const expName = await page.evaluate(() => {
+    const list = [...document.querySelectorAll('#front_product_search_cardset option')];
+    return list.map((data) => ({ name: data.textContent, value: data.value }));
+  });
+  if(isNaN(nameArray) === false){
+    for (let i = 0; i < expName.length; i++) {
+      if (expName[i].value === nameArray) {
+        pushLine(`エキスパンション:${expName[i].name}`);
+      }
+    }
+  }
   // datasにitemNameの値を全て取得後、配列にして代入
   const datas = await page.evaluate(() => {
     const list = [...document.querySelectorAll('.itemName')];
@@ -217,7 +235,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
             //「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
             if (nameArray.length === 0 || inputMessage === '') {
               pushLine('見当たりませんでした');
-              browser.close();
+              //browser.close();
               return;
             //入力された文字列が含まれるエキスパンションが複数あった場合
             } else if(nameArray.length > 1) {
@@ -272,7 +290,8 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         if (event.message.text.match(/[0-9]{1,3}/)) {
           pushLine('データ取得中、しばらくお待ちください');
           (async () => {
-            try {
+            rankValue(`${event.message.text}`);
+              /*
               const browser = await puppetter.launch({
                 args: ['--no-sandbox'],
               });
@@ -313,9 +332,9 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
                 }
               }, 500);
               browser.close();
-            } catch (e) {
-              console.error(e);
-            }
+              */
+
+
           })();
         }
 
