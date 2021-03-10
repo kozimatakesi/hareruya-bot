@@ -3,7 +3,6 @@ const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 const mysql = require('mysql');
-const puppetter = require('puppeteer');
 const export_function = require('./function.js');
 require('dotenv').config();
 
@@ -32,15 +31,6 @@ server.listen(process.env.PORT || 3000);
 const bot = new line.Client(lineConfig);
 
 // -----------------------------------------------------------------------------
-//関数の定義
-//引数に入れた文字列をLineに送信する関数
-const pushLine = (message) => {
-  bot.pushMessage(process.env.LINE_ID, {
-    type: 'text',
-    text: message,
-  });
-}
-// -----------------------------------------------------------------------------
 // ルーター設定
 server.post('/webhook', line.middleware(lineConfig), (req, res) => {
   // 先行してLINE側にステータスコード200でレスポンスする。
@@ -48,6 +38,7 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
 
   // すべてのイベント処理のプロミスを格納する配列。
   const eventsProcessed = [];
+  user_id = req.body.events[0].source.userId;
 
   (async() => {
   // イベントオブジェクトを順次処理。
@@ -93,11 +84,22 @@ server.post('/webhook', line.middleware(lineConfig), (req, res) => {
         //エキスパンションナンバー（3桁以内の数値）を入力した場合
         if (event.message.text.match(/[0-9]{1,3}/)) {
           pushLine('データ取得中、しばらくお待ちください');
-          (async () => {
-            export_function.rankValue(`${event.message.text}`);
-          })();
+          export_function.rankValue(`${event.message.text}`);
         }
       }
     });
   })();
 });
+// -----------------------------------------------------------------------------
+//関数の定義
+//user_idをfunction.jsに渡すための関数
+exports.userIdFunction = () => {
+  return user_id;
+}
+//引数に入れた文字列をLineに送信する関数
+const pushLine = (message) => {
+  bot.pushMessage(user_id, {
+    type: 'text',
+    text: message,
+  });
+}

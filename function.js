@@ -1,5 +1,6 @@
 const puppetter = require('puppeteer');
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
+const export_function = require('./index.js');
 require('dotenv').config();
 
 const lineConfig = {
@@ -11,9 +12,8 @@ const lineConfig = {
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(lineConfig);
 
-
 const pushLine = (message) => {
-  bot.pushMessage(process.env.LINE_ID, {
+  bot.pushMessage(export_function.userIdFunction(), {
     type: 'text',
     text: message,
   });
