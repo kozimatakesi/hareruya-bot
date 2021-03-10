@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const mysql = require('mysql');
 const puppetter = require('puppeteer');
 const export_function = require('./function.js');
+require('dotenv').config();
 
 // -----------------------------------------------------------------------------
 // データベース接続
@@ -21,12 +22,6 @@ const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
   channelSecret: process.env.LINE_CHANNEL_SECRET, // 環境変数からChannel Secretをセットしています
 };
-/*
-const lineConfig = {
-  channelAccessToken: 'w6VjWFqXigMZhPTwkqq5aQZBd563o04eEvUNQTKTUp87LGfliqD0O5BPl7431xeZeWwU2OJlvfo7/TOpoWnFW2NhjqcYNK5AG9rcqEvF9hoTM+6/JuCWYxnRnVkKn2jq1Ua8q2E/qbN8mcQtssAViQdB04t89/1O/w1cDnyilFU=', // 環境変数からアクセストークンをセットしています
-  channelSecret: '98cf4cabb5c2bcd86b00de14fb8814cd', // 環境変数からChannel Secretをセットしています
-};
-*/
 // -----------------------------------------------------------------------------
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
@@ -40,7 +35,7 @@ const bot = new line.Client(lineConfig);
 //関数の定義
 //引数に入れた文字列をLineに送信する関数
 const pushLine = (message) => {
-  bot.pushMessage('U6b3963a1368a4879d411264a6950a01d', {
+  bot.pushMessage(process.env.LINE_ID, {
     type: 'text',
     text: message,
   });
