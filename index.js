@@ -2,18 +2,20 @@
 const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
-const mysql = require('mysql');
+//const mysql = require('mysql');
 const export_function = require('./function.js');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
 // データベース接続
+/*
 const pool = mysql.createPool({
   host: process.env.SERVER_NAME,
   user: process.env.USER_NAME,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
 });
+*/
 // -----------------------------------------------------------------------------
 // パラメータ設定
 
