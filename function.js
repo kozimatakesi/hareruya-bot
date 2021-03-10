@@ -1,6 +1,6 @@
 const puppetter = require('puppeteer');
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
-const export_function = require('./index.js');
+const exportFunction = require('./index.js');
 require('dotenv').config();
 
 const lineConfig = {
@@ -11,18 +11,17 @@ const lineConfig = {
 // ルーター設定
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(lineConfig);
-
 const pushLine = (message) => {
-  bot.pushMessage(export_function.userIdFunction(), {
+  bot.pushMessage(exportFunction.userIdFunction(), {
     type: 'text',
     text: message,
   });
-}
+};
 
-//引数が数値であればそのまま、文字列であれば対応したエキスパンションナンバーをURLに入れ、そこから価格TOP５のカード名と価格をLINEにプッシュする関数
+// 引数が数値であればそのまま、文字列であれば対応したエキスパンションナンバーをURLに入れ、そこから価格TOP５のカード名と価格をLINEにプッシュする関数
 exports.rankValue = async (nameArray) => {
-  let urlNumber = ''
-  if(isNaN(nameArray) === false){
+  let urlNumber = '';
+  if (isNaN(nameArray) === false) {
     urlNumber = nameArray;
   } else {
     urlNumber = nameArray[0].value;
@@ -38,8 +37,8 @@ exports.rankValue = async (nameArray) => {
     const list = [...document.querySelectorAll('#front_product_search_cardset option')];
     return list.map((data) => ({ name: data.textContent, value: data.value }));
   });
-  if(isNaN(nameArray) === false){
-    const inputNumberName = expName.filter(data => data.value === nameArray)
+  if (isNaN(nameArray) === false) {
+    const inputNumberName = expName.filter((data) => data.value === nameArray);
     pushLine(`エキスパンション:${inputNumberName[0].name}`);
   }
   // datasにitemNameの値を全て取得後、配列にして代入
@@ -67,7 +66,7 @@ exports.rankValue = async (nameArray) => {
   browser.close();
 };
 
-//引数に与えられた文字列が含まれるエキスパンションを配列にして返す関数
+// 引数に与えられた文字列が含まれるエキスパンションを配列にして返す関数
 exports.nameAndValueArray = async (inputMessage) => {
   const browser = await puppetter.launch({
     args: ['--no-sandbox'],
@@ -78,8 +77,8 @@ exports.nameAndValueArray = async (inputMessage) => {
     const list = [...document.querySelectorAll('#front_product_search_cardset option')];
     return list.map((data) => ({ name: data.textContent, value: data.value }));
   });
-  //文字列inputMessageがnameに含まれる要素を配列nameArrayに追加
-  const nameArray = datas.filter(data => data.name.match(inputMessage));
+  // 文字列inputMessageがnameに含まれる要素を配列nameArrayに追加
+  const nameArray = datas.filter((data) => data.name.match(inputMessage));
   browser.close();
   return nameArray;
-}
+};
