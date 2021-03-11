@@ -4,7 +4,7 @@ const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 // const mysql = require('mysql');
 const exportFunction = require('./function.js');
-require('dotenv').config();
+//require('dotenv').config();
 
 // -----------------------------------------------------------------------------
 // データベース接続

@@ -1,7 +1,7 @@
 const puppetter = require('puppeteer');
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const exportFunction = require('./index.js');
-require('dotenv').config();
+//require('dotenv').config();
 
 const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
