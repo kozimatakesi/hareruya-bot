@@ -3,8 +3,8 @@ const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 // const mysql = require('mysql');
-const exportFunction = require('./function.js');
-//require('dotenv').config();
+const { pushLine, rankValue, nameAndValueArray } = require('./function.js');
+require('dotenv').config();
 
 // -----------------------------------------------------------------------------
 // データベース接続
@@ -35,73 +35,49 @@ const bot = new line.Client(lineConfig);
 // 関数の定義
 // -----------------------------------------------------------------------------
 // ルーター設定
-server.post('/webhook', line.middleware(lineConfig), (req, res) => {
+server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   // 先行してLINE側にステータスコード200でレスポンスする。
   res.sendStatus(200);
 
-  // すべてのイベント処理のプロミスを格納する配列。
-  const eventsProcessed = [];
-  const userId = req.body.events[0].source.userId;
+  //events配列から配列の0番目の要素だけを変数に代入
+  const [lineEvent] = req.body.events;
+  if(!lineEvent){
+    return;
+  }
+  const { userId } = lineEvent.source.userId;
 
-  // 引数に入れた文字列をLineに送信する関数
-  const pushLine = (message) => {
-    bot.pushMessage(userId, {
-      type: 'text',
-      text: message,
-    });
-  };
+  if(lineEvent.type !== 'message' || lineEvent.message.type !== 'text'){
+    return;
+  }
 
-  // userIdをfunction.jsに渡すための関数
-  exports.userIdFunction = () => userId;
+  if(!lineEvent.message.text.match('!')){
+    return;
+  }
+  // 「!」入力後の文字列が含まれるエキスパンションを検索
+  pushLine(userId, 'データ取得中、しばらくお待ちください');
+  const inputMessage = lineEvent.message.text.slice(1);
+  const nameArray = await nameAndValueArray(inputMessage);
+  console.log(nameArray);
+  // 「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
+  if (nameArray.length === 0 || inputMessage === '') {
+    pushLine('見当たりませんでした');
 
-  (async () => {
-  // イベントオブジェクトを順次処理。
-    req.body.events.forEach((event) => {
-      // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
-      if (event.type === 'message' && event.message.type === 'text') {
-        // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。東京の天気を返す
-        if (event.message.text === 'こんにちは') {
-          fetch('http://api.openweathermap.org/data/2.5/weather?q=Tokyo&appid=9a4d371b6fc452d3edd2f79b142c8c18&lang=ja&units=metric')
-            .then((respons) => respons.json())
-            .then((json) => {
-              eventsProcessed.push(bot.replyMessage(event.replyToken, {
-                type: 'text',
-                text: json.weather[0].description,
-              }));
-            });
-        }
-        // 「!」入力後の文字列が含まれるエキスパンションを検索
-        if (event.message.text.match('!')) {
-          pushLine('データ取得中、しばらくお待ちください');
-          const inputMessage = event.message.text.slice(1);
-          (async () => {
-            const nameArray = await exportFunction.nameAndValueArray(inputMessage);
-            console.log(nameArray);
-            // 「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
-            if (nameArray.length === 0 || inputMessage === '') {
-              pushLine('見当たりませんでした');
-
-            // 入力された文字列が含まれるエキスパンションが複数あった場合
-            } else if (nameArray.length > 1) {
-              const manyExpantion = nameArray.map((data) => `「${data.name}」は「${data.value}」です`);
-              const joinArray = manyExpantion.join('\n---------------------------------------------\n');
-              console.log(joinArray);
-              pushLine(`${joinArray}`);
-              pushLine('複数一致しています、知りたいエキスパンションのナンバーを入力してください');
-            // 入力された文字列が含まれるエキスパンションが一つだった場合
-            } else {
-              pushLine(`エキスパンション:${nameArray[0].name}`);
-              exportFunction.rankValue(nameArray);
-            }
-          })();
-        }
-        // エキスパンションナンバー（3桁以内の数値）を入力した場合
-        if (event.message.text.match(/[0-9]{1,3}/)) {
-          pushLine('データ取得中、しばらくお待ちください');
-          exportFunction.rankValue(`${event.message.text}`);
-        }
-      }
-    });
-  })();
+  // 入力された文字列が含まれるエキスパンションが複数あった場合
+  } else if (nameArray.length > 1) {
+    const manyExpantion = nameArray.map((data) => `「${data.name}」は「${data.value}」です`);
+    const joinArray = manyExpantion.join('\n---------------------------------------------\n');
+    console.log(joinArray);
+    pushLine(userId, `${joinArray}`);
+    pushLine(userId,'複数一致しています、知りたいエキスパンションのナンバーを入力してください');
+  // 入力された文字列が含まれるエキスパンションが一つだった場合
+  } else {
+    pushLine(userId,`エキスパンション:${nameArray[0].name}`);
+    exportFunction.rankValue(nameArray);
+  }
+  // エキスパンションナンバー（3桁以内の数値）を入力した場合
+  if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
+    pushLine(userId,'データ取得中、しばらくお待ちください');
+    rankValue(`${lineEvent.message.text}`);
+  }
 });
 // -----------------------------------------------------------------------------

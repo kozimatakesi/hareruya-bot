@@ -1,7 +1,6 @@
 const puppetter = require('puppeteer');
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
-const exportFunction = require('./index.js');
-//require('dotenv').config();
+require('dotenv').config();
 
 const lineConfig = {
   channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
@@ -11,15 +10,15 @@ const lineConfig = {
 // ルーター設定
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(lineConfig);
-const pushLine = (message) => {
-  bot.pushMessage(exportFunction.userIdFunction(), {
+const pushLine = (userId, message) => {
+  bot.pushMessage(userId, {
     type: 'text',
     text: message,
   });
 };
 
 // 引数が数値であればそのまま、文字列であれば対応したエキスパンションナンバーをURLに入れ、そこから価格TOP５のカード名と価格をLINEにプッシュする関数
-exports.rankValue = async (nameArray) => {
+exports.rankValue = async (userId, nameArray) => {
   let urlNumber = '';
   if (isNaN(nameArray) === false) {
     urlNumber = nameArray;
@@ -39,7 +38,7 @@ exports.rankValue = async (nameArray) => {
   });
   if (isNaN(nameArray) === false) {
     const inputNumberName = expName.filter((data) => data.value === nameArray);
-    pushLine(`エキスパンション:${inputNumberName[0].name}`);
+    pushLine(userId, `エキスパンション:${inputNumberName[0].name}`);
   }
   // datasにitemNameの値を全て取得後、配列にして代入
   const datas = await page.evaluate(() => {
@@ -54,7 +53,7 @@ exports.rankValue = async (nameArray) => {
 
   let i = 0;
   const countUp = () => {
-    pushLine(`第${i + 1}位\n${datas[i]}\n${prices[i]}`);
+    pushLine(userId, `第${i + 1}位\n${datas[i]}\n${prices[i]}`);
     console.log(i++);
   };
   const intervalId = setInterval(() => {
