@@ -3,7 +3,8 @@ const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const fetch = require('node-fetch');
 // const mysql = require('mysql');
-const { pushLine, rankValue, nameAndValueArray } = require('./function.js');
+const { rankValue, nameAndValueArray } = require('./function.js');
+const { pushLine } = require('./pushLine.js')
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
@@ -44,22 +45,26 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   if(!lineEvent){
     return;
   }
-  const { userId } = lineEvent.source.userId;
+  const { userId } = lineEvent.source;
 
   if(lineEvent.type !== 'message' || lineEvent.message.type !== 'text'){
     return;
   }
 
-  if(!lineEvent.message.text.match('!')){
+  const inputMessage = lineEvent.message.text;
+
+  //エキスパンションナンバー（3桁以内の数値）を入力した場合
+  if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
+    pushLine(userId,'データ取得中、しばらくお待ちください');
+    rankValue(userId, inputMessage);
     return;
   }
-  // 「!」入力後の文字列が含まれるエキスパンションを検索
-  pushLine(userId, 'データ取得中、しばらくお待ちください');
-  const inputMessage = lineEvent.message.text.slice(1);
+
   const nameArray = await nameAndValueArray(inputMessage);
   console.log(nameArray);
+
   // 「!」だけ入力された場合と入力された文字列が含まれるエキスパンションがなかった場合
-  if (nameArray.length === 0 || inputMessage === '') {
+  if (nameArray.length === 0) {
     pushLine('見当たりませんでした');
 
   // 入力された文字列が含まれるエキスパンションが複数あった場合
@@ -72,12 +77,7 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   // 入力された文字列が含まれるエキスパンションが一つだった場合
   } else {
     pushLine(userId,`エキスパンション:${nameArray[0].name}`);
-    exportFunction.rankValue(nameArray);
-  }
-  // エキスパンションナンバー（3桁以内の数値）を入力した場合
-  if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
-    pushLine(userId,'データ取得中、しばらくお待ちください');
-    rankValue(`${lineEvent.message.text}`);
+    rankValue(userId,nameArray);
   }
 });
 // -----------------------------------------------------------------------------

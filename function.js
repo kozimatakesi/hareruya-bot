@@ -1,5 +1,6 @@
 const puppetter = require('puppeteer');
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
+const { pushLine } = require('./pushLine.js');
 require('dotenv').config();
 
 const lineConfig = {
@@ -10,12 +11,14 @@ const lineConfig = {
 // ルーター設定
 // APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(lineConfig);
-const pushLine = (userId, message) => {
+/*
+exports.pushLine = (userId, message) => {
   bot.pushMessage(userId, {
     type: 'text',
     text: message,
   });
 };
+*/
 
 // 引数が数値であればそのまま、文字列であれば対応したエキスパンションナンバーをURLに入れ、そこから価格TOP５のカード名と価格をLINEにプッシュする関数
 exports.rankValue = async (userId, nameArray) => {
@@ -52,13 +55,13 @@ exports.rankValue = async (userId, nameArray) => {
   });
 
   let i = 0;
-  const countUp = () => {
-    pushLine(userId, `第${i + 1}位\n${datas[i]}\n${prices[i]}`);
+  const countUp = async() => {
+    await pushLine(userId, `第${i + 1}位\n${datas[i]}\n${prices[i]}`);
     console.log(i++);
   };
   const intervalId = setInterval(() => {
     countUp();
-    if (i >= 5) {
+    if (i >= 9) {
       clearInterval(intervalId);
     }
   }, 500);
