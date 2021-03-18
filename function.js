@@ -32,16 +32,16 @@ exports.rankValue = async (userId, nameArray) => {
     const list = [...document.querySelectorAll('.itemDetail__price')];
     return list.map((data) => data.textContent);
   });
-  //表示用の配列作成、JP且つ、500円以上
+  // 表示用の配列作成、JP且つ、500円以上
   const jpOnlyArray = [];
   let y = 1;
-  for(let i = 0; i < datas.length; i++){
-    if(datas[i].slice(1, 3) === "JP" && !(prices[i].slice(2) < 500)){
+  for (let i = 0; i < datas.length; i++) {
+    if (datas[i].slice(1, 3) === 'JP' && !(prices[i].slice(2) < 500)) {
       jpOnlyArray.push(`第${y}位\n${datas[i]}\n${prices[i]}\n--------------------------------------------------\n`);
       y++;
     }
   }
-  pushLine(userId, jpOnlyArray.join(""));
+  pushLine(userId, jpOnlyArray.join(''));
   browser.close();
 };
 

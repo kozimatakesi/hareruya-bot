@@ -2,7 +2,7 @@
 const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
 const { rankValue, nameAndValueArray } = require('./function.js');
-const { pushLine } = require('./pushLine.js')
+const { pushLine } = require('./pushLine.js');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
@@ -16,29 +16,28 @@ const lineConfig = {
 // Webサーバー設定
 server.listen(process.env.PORT || 3000);
 
-
 // -----------------------------------------------------------------------------
 // ルーター設定
 server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   // 先行してLINE側にステータスコード200でレスポンスする。
   res.sendStatus(200);
 
-  //events配列から配列の0番目の要素だけを変数に代入
+  // events配列から配列の0番目の要素だけを変数に代入
   const [lineEvent] = req.body.events;
-  if(!lineEvent){
+  if (!lineEvent) {
     return;
   }
   const { userId } = lineEvent.source;
 
-  if(lineEvent.type !== 'message' || lineEvent.message.type !== 'text'){
+  if (lineEvent.type !== 'message' || lineEvent.message.type !== 'text') {
     return;
   }
 
   const inputMessage = lineEvent.message.text;
 
-  //エキスパンションナンバー（3桁以内の数値）を入力した場合
+  // エキスパンションナンバー（3桁以内の数値）を入力した場合
   if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
-    pushLine(userId,'データ取得中、しばらくお待ちください');
+    pushLine(userId, 'データ取得中、しばらくお待ちください');
     rankValue(userId, inputMessage);
     return;
   }
@@ -46,7 +45,7 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   const nameArray = await nameAndValueArray(inputMessage);
   console.log(nameArray);
 
-  //入力された文字列が含まれるエキスパンションがなかった場合
+  // 入力された文字列が含まれるエキスパンションがなかった場合
   if (!nameArray[0]) {
     pushLine(userId, `「${lineEvent.message.text}」が含まれるエキスパンションは見当たりませんでした`);
   // 入力された文字列が含まれるエキスパンションが複数あった場合
@@ -55,11 +54,11 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
     const joinArray = manyExpantion.join('\n---------------------------------------------\n');
     console.log(joinArray);
     pushLine(userId, `${joinArray}`);
-    pushLine(userId,'複数一致しています、知りたいエキスパンションのナンバーを入力してください');
+    pushLine(userId, '複数一致しています、知りたいエキスパンションのナンバーを入力してください');
   // 入力された文字列が含まれるエキスパンションが一つだった場合
   } else {
-    pushLine(userId,`エキスパンション:${nameArray[0].name}`);
-    rankValue(userId,nameArray);
+    pushLine(userId, `エキスパンション:${nameArray[0].name}`);
+    rankValue(userId, nameArray);
   }
 });
 // -----------------------------------------------------------------------------
