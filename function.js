@@ -41,6 +41,11 @@ exports.rankValue = async (userId, nameArray) => {
       y++;
     }
   }
+  if (jpOnlyArray.length === 0) {
+    pushLine(userId, '公式サイトをご覧ください');
+    browser.close();
+    return;
+  }
   pushLine(userId, jpOnlyArray.join(''));
   browser.close();
 };
@@ -97,6 +102,11 @@ exports.uncommonSerch = async (userId, nameArray) => {
       jpOnlyArray.push(`第${y}位\n${datas[i]}\n${prices[i]}\n--------------------------------------------------\n`);
       y++;
     }
+  }
+  if (jpOnlyArray.length === 0) {
+    pushLine(userId, '該当するカードはありませんでした');
+    browser.close();
+    return;
   }
   pushLine(userId, jpOnlyArray.join(''));
   browser.close();
