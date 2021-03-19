@@ -69,4 +69,3 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
     rankValue(userId, nameArray);
   }
 });
-// -----------------------------------------------------------------------------
