@@ -1,7 +1,8 @@
 // モジュールのインポート
 const server = require('express')();
 const line = require('@line/bot-sdk'); // Messaging APIのSDKをインポート
-const { rankValue, nameAndValueArray } = require('./function.js');
+const { registerCustomQueryHandler } = require('puppeteer');
+const { rankValue, nameAndValueArray, uncommonSerch } = require('./function.js');
 const { pushLine } = require('./pushLine.js');
 require('dotenv').config();
 
@@ -34,6 +35,13 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   }
 
   const inputMessage = lineEvent.message.text;
+
+  if (inputMessage.match('!')) {
+    const uncommon = lineEvent.message.text.slice(1);
+    pushLine(userId, 'アンコモン買取データ取得中、しばらくお待ちください');
+    uncommonSerch(userId, uncommon);
+    return;
+  }
 
   // エキスパンションナンバー（3桁以内の数値）を入力した場合
   if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
