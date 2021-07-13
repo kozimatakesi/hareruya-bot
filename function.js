@@ -36,7 +36,7 @@ exports.rankValue = async (userId, nameArray) => {
   const jpOnlyArray = [];
   let y = 1;
   for (let i = 0; i < datas.length; i++) {
-    if (datas[i].slice(1, 3) === 'JP' && !(prices[i].slice(2) < 500)) {
+    if (datas[i].slice(1, 3) === 'JP' && !(prices[i].slice(2) < 100)) {
       jpOnlyArray.push(`第${y}位\n${datas[i]}\n${prices[i]}\n--------------------------------------------------\n`);
       y++;
     }
