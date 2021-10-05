@@ -38,14 +38,14 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
 
   if (inputMessage.match('!')) {
     const uncommon = lineEvent.message.text.slice(1);
-    pushLine(userId, 'アンコモン買取データ取得中、しばらくお待ちください');
+    await pushLine(userId, 'アンコモン買取データ取得中、しばらくお待ちください');
     uncommonSerch(userId, uncommon);
     return;
   }
 
   // エキスパンションナンバー（3桁以内の数値）を入力した場合
   if (lineEvent.message.text.match(/[0-9]{1,3}/)) {
-    pushLine(userId, 'データ取得中、しばらくお待ちください');
+    await pushLine(userId, 'データ取得中、しばらくお待ちください');
     rankValue(userId, inputMessage);
     return;
   }
