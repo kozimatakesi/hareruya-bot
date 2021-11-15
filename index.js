@@ -55,7 +55,11 @@ server.post('/webhook', line.middleware(lineConfig), async (req, res) => {
 
   // 入力された文字列が含まれるエキスパンションがなかった場合
   if (!nameArray[0]) {
-    pushLine(userId, `「${lineEvent.message.text}」が含まれるエキスパンションは見当たりませんでした`);
+    pushLine(userId, `「${lineEvent.message.text}」が含まれるエキスパンションは見当たりませんでした\n
+    1.エキスパンション名を入力する(部分一致可)\n
+    2.一覧から取得したいエキスパンションのエキスパンションナンバーを入力する\n
+    *アンコモンの価格ランキングを取得したい場合*\n
+    エキスパンションナンバーの前に「!」(半角)を入力する`);
   // 入力された文字列が含まれるエキスパンションが複数あった場合
   } else if (nameArray.length > 1) {
     const manyExpantion = nameArray.map((data) => `「${data.name}」は「${data.value}」です`);
